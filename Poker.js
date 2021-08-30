@@ -30,6 +30,12 @@ class Poker {
 
     }
 
+    evaluateHand(hand) {
+        if (this.checkFlush(hand) && this.checkStraight(hand)) {
+            return 900 + this.checkFlush(hand);
+        }
+    }
+
     checkFlush(hand) {
         let flushes = this.deck.suits.map((suit) => {
             let cardsOfaSuit = hand.filter((card) => card.suit == suit);
@@ -57,20 +63,31 @@ class Poker {
         return false;
     }
 
-    checkGroup(hand, type) { //Checks Pokers(4), Trios(3) or Pairs(3)
+    checkGroup(hand, type) { //Checks Pokers(4), Three of a kind(3) or Pairs(3)
         let pokers = this.deck.numbers.map((number) => {
             let cardsOfaNumber = hand.filter((card) => card.number == number);
-            if (cardsOfaNumber.length == type) return number
+            if (cardsOfaNumber.length == type) return number;
             else return 0;
         });
-        if (Math.max(pokers)==type) {
-
-        }
-        else return false;
+        return Math.max(...pokers);
     }
 
-    checkFlush(hand) {
+    checkFullHouse(hand) {
+        let trio = this.checkGroup(hand, 3);
+        if (trio == 0) return 0;
+        let trioless = hand.filter((card) => card.number != trio);
+        let pair = this.checkGroup(trioless, 2);
+        if (pair > 0) return trio;
+        else return 0;
+    }
 
+    checkTwoPair(hand) {
+        let pair1 = this.checkGroup(hand, 2);
+        if (pair1 == 0) return 0;
+        let pairless = hand.filter((card) => card.number != pair1);
+        let pair2 = this.checkGroup(pairless, 2);
+        if (pair2 > 0) return pair1;
+        else return 0;
     }
 
     getHighestCard(hand) {
