@@ -4,36 +4,63 @@ import Table from "./Table";
 import Card from "./Card";
 
 class Poker {
-    constructor(players = []) {
-        this.players = players.map((name) => { return new Player(name) });
+    constructor() {
+        this.players = [];
         this.deck = new Deck();
         this.table = new Table();
     }
 
-    shuffleCards() {
+    shuffleCards() { //Refill deck and shufle cards randomly
         this.Deck.shuffle();
     }
 
-    dealCards() {
+    addPlayer(name, money) {
+        let p = new Player(name, money);
+        this.players.push(p);
+    }
+
+    dealCards() { // Give two cards to each player
         this.players.forEach((p) => {
             p.addCards(this.deck.draw(2));
         });
     }
 
-    showCard() {
-        let amount = 1;
-        if (this.table.getShownCards() == 0) amount = 3;
-        this.table.addCards(this.deck.draw(amount));
+    showCard() { // Put a card on the table. If there are no cards on the tables 3 cards will be shown at once.
+        let shownCards = this.table.getShownCards()
+        if (shownCards < 5) {
+            let amount = 1;
+            if (shownCards == 0) amount = 3;
+            this.table.addCards(this.deck.draw(amount));
+        }
     }
 
-    checkWiner() {
-
+    checkWiner() { //Returns the name of the winner
+        let points = this.players.map((p) => {
+            return this.evaluateHand(p.hand);
+        });
+        return this.players[points.indexOf(Math.max(points))].name;
     }
 
+
+    /////////////////////////////////////////////////////////////////////////////
     evaluateHand(hand) {
         if (this.checkFlush(hand) && this.checkStraight(hand)) {
             return 900 + this.checkFlush(hand);
-        }
+        } else if (this.checkGroup(hand, 4)) {
+            return 800 + this.checkGroup(hand, 4);
+        } else if (this.checkFullHouse(hand)) {
+            return 700 + this.checkFullHouse(hand);
+        } else if (this.checkFlush(hand)) {
+            return 600 + this.checkFlush(hand);
+        } else if (this.checkStraight(hand)) {
+            return 500 + this.checkStraight(hand);
+        } else if (this.checkGroup(hand, 3)) {
+            return 400 + this.checkGroup(hand, 3);
+        } else if (this.checkTwoPair(hand)) {
+            return 300 + this.checkTwoPair(hand);
+        } else if (this.checkGroup(hand, 2)) {
+            return 200 + this.checkGroup(hand, 2);
+        } else return this.getHighestCard(hand).number;
     }
 
     checkFlush(hand) {
