@@ -8,7 +8,7 @@ do {
     let name = question("Name player: ");
     //let money = question("Number of chips? (recomended 100): ")
     game.addPlayer(name, 100)
-} while (question("Another player? (y/n)").charAt(0) === 'y');
+} while (question("Another player? (y/n) ").charAt(0) === 'y');
 
 game.shuffleCards();
 var players = game.getPlayerList();
@@ -73,4 +73,4 @@ do { //Each loop is a round
     console.log(`${endRound[0]} has won ${endRound[1]} coins!`);
     
 
-} while (question("Do you want to play another round? (y/n)").charAt(0) !== 'n')
+} while (question("Do you want to play another round? (y/n) ").charAt(0) !== 'n')

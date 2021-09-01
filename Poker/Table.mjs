@@ -9,7 +9,7 @@ class Table {
         this.cards=this.cards.concat(cards);
     }
 
-    clean() {
+    clear() {
         this.cards = [];
     }
 

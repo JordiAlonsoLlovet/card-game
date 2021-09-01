@@ -2,6 +2,7 @@ import Deck from "./Deck.mjs";
 import Player from "./Player.mjs";
 import Table from "./Table.mjs";
 import Card from "./Card.mjs";
+import { test } from "./Test.mjs";
 
 class Poker {
     constructor() {
@@ -89,13 +90,12 @@ class Poker {
     endLoop() {
         let players = this.players.filter((p) => !p.folded);
         let end = players.every((p) => p.bet == players[0].bet);
-        console.log(end)
         if (end) {
             let moreCards = this.showCard()
             if (!moreCards) {
                 //End of the round.
                 let winner = this.checkWiner();
-                let gain = this.table.players.map((p) => { return p.bet; }).reduce((a, b) => a + b, 0);
+                let gain = this.players.map((p) => { return p.bet; }).reduce((a, b) => a + b, 0);
                 this.table.clear();
                 this.players.forEach((p) => {
                     if (p.name == winner) p.win(gain);
@@ -113,31 +113,40 @@ class Poker {
     checkWiner() { //Returns the winner
         let points = this.players.map((p) => {
             if (p.folded) return 0;
-            else return this.evaluateHand(p.hand);
+            else return this.evaluateHand(this.table.cards.concat(p.hand));
         });
-        return this.players[points.indexOf(Math.max(points))].name;
+        let maxPoints = Math.max(...points);
+        return this.players[points.indexOf(maxPoints)].name;
     }
 
 
     /////////////////////////////////////////////////////////////////////////////
     evaluateHand(hand) {
         if (this.checkFlush(hand) && this.checkStraight(hand)) {
+            test("Straight Flush");
             return 900 + this.checkFlush(hand);
         } else if (this.checkGroup(hand, 4)) {
+            test("Poker");
             return 800 + this.checkGroup(hand, 4);
         } else if (this.checkFullHouse(hand)) {
+            test("Full House");
             return 700 + this.checkFullHouse(hand);
         } else if (this.checkFlush(hand)) {
+            test("Flush");
             return 600 + this.checkFlush(hand);
         } else if (this.checkStraight(hand)) {
+            test("Straight");
             return 500 + this.checkStraight(hand);
         } else if (this.checkGroup(hand, 3)) {
+            test("Three of a kind");
             return 400 + this.checkGroup(hand, 3);
         } else if (this.checkTwoPair(hand)) {
+            test("Double Pair");
             return 300 + this.checkTwoPair(hand);
         } else if (this.checkGroup(hand, 2)) {
+            test("Pair");
             return 200 + this.checkGroup(hand, 2);
-        } else return this.getHighestCard(hand).number;
+        } else return this.getHighestCard(hand).getNumber();
     }
 
     checkFlush(hand) {
@@ -168,11 +177,14 @@ class Poker {
     }
 
     checkGroup(hand, type) { //Checks Pokers(4), Three of a kind(3) or Pairs(3)
+    test(type)
+        test(hand);
         let pokers = this.deck.numbers.map((number) => {
             let cardsOfaNumber = hand.filter((card) => card.number == number);
             if (cardsOfaNumber.length == type) return number;
             else return 0;
         });
+        test(pokers);
         return Math.max(...pokers);
     }
 
