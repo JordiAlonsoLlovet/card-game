@@ -5,7 +5,10 @@ class Card {
     }
 
     getCardName() {
-        return `${this.number}  de ${this.suit}`;
+        return `${this.number}  of ${this.suit}`;
+    }
+    getShortName() {
+        return `${this.number.chatAt(0)}${this.suit.charAt(0)}`;
     }
     getSuit() {
         return this.suit;

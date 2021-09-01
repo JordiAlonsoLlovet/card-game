@@ -1,7 +1,7 @@
-import Deck from "./Deck";
-import Player from "./Player";
-import Table from "./Table";
-import Card from "./Card";
+import Deck from "./Deck.mjs";
+import Player from "./Player.mjs";
+import Table from "./Table.mjs";
+import Card from "./Card.mjs";
 
 class Poker {
     constructor() {
@@ -10,14 +10,64 @@ class Poker {
         this.table = new Table();
     }
 
+    getPlayerList() {
+        let names = this.players.map((p) => {
+            if(p.folded) return ""
+            else return p.name;
+        });
+        return names.filter((n) => n != "");
+    }
+
+    getPlayerState(playerName) { //Returns array [cards, money left, money bet on the table]
+        let player = this.players.filter((p) => p.name == playerName)[0];
+        let result = [];
+        result.push(player.getHand());
+        result.push(player.money);
+        result.push(player.bet);
+        return result;
+    }
+
+    getCardsOnTable() {
+        return this.table.cards.map((card) => { return card.getCardName(); });
+    }
+
+    getCurrentBet() {
+        let bets = this.players.map((p) => { return p.bet; });
+        return Math.max(...bets);
+	}
+    makeBet(playerName, amount) { 
+        this.players.forEach((player)=> {
+            if (player.name == playerName) {
+                player.makeBet(amount);
+            }
+        });
+    }
+
+    changeCard(playerName, cardIndex) { 
+        this.players.forEach((player)=> {
+            if (player.name == playerName) {
+                let card = this.deck.draw(1);
+                player.changeCard(cardIndex, card[0]);
+            }
+        });
+    }
+
     shuffleCards() { //Refill deck and shufle cards randomly
-        this.Deck.shuffle();
+        this.deck.shuffle();
     }
 
     addPlayer(name, money) {
         let p = new Player(name, money);
         this.players.push(p);
     }
+
+    foldPlayer(playerName) {
+        this.players.forEach((player) => {
+            if (player.name == playerName) {
+                player.folded = true;
+            }
+        });
+	}
 
     dealCards() { // Give two cards to each player
         this.players.forEach((p) => {
@@ -31,12 +81,39 @@ class Poker {
             let amount = 1;
             if (shownCards == 0) amount = 3;
             this.table.addCards(this.deck.draw(amount));
+            return true;
         }
+        else return false;
     }
 
-    checkWiner() { //Returns the name of the winner
+    endLoop() {
+        let players = this.players.filter((p) => !p.folded);
+        let end = players.every((p) => p.bet == players[0].bet);
+        console.log(end)
+        if (end) {
+            let moreCards = this.showCard()
+            if (!moreCards) {
+                //End of the round.
+                let winner = this.checkWiner();
+                let gain = this.table.players.map((p) => { return p.bet; }).reduce((a, b) => a + b, 0);
+                this.table.clear();
+                this.players.forEach((p) => {
+                    if (p.name == winner) p.win(gain);
+                    p.newRound()
+                });
+                this.players.push(this.players[0]);
+                this.players.splice(0, 1); //Move first player to the end
+
+                return [winner, gain];
+			}
+        }
+        return false;
+	}
+
+    checkWiner() { //Returns the winner
         let points = this.players.map((p) => {
-            return this.evaluateHand(p.hand);
+            if (p.folded) return 0;
+            else return this.evaluateHand(p.hand);
         });
         return this.players[points.indexOf(Math.max(points))].name;
     }

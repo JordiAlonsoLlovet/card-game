@@ -1,4 +1,4 @@
-import Card from "./Card";
+import Card from "./Card.mjs";
 
 class Table {
     constructor() {
@@ -6,7 +6,7 @@ class Table {
     }
 
     addCards(cards) {
-        this.cards.concat(cards);
+        this.cards=this.cards.concat(cards);
     }
 
     clean() {

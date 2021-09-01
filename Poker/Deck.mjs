@@ -1,4 +1,4 @@
-import Card from "./Card"
+import Card from "./Card.mjs"
 
 class Deck {
     constructor() {
@@ -8,12 +8,13 @@ class Deck {
     }
 
     shuffle() {
-        this.cards = this.suits.map(suit => {
+        this.cards = this.suits.flatMap(suit => {
             return this.numbers.map(number => {
                 return new Card(number, suit);
             });
         });
         let array = this.cards
+        
         var currentIndex = array.length, randomIndex;
 
         // While there remain elements to shuffle...
@@ -27,7 +28,6 @@ class Deck {
             [array[currentIndex], array[randomIndex]] = [
                 array[randomIndex], array[currentIndex]];
         }
-
         this.cards = array;
     }
 
